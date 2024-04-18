@@ -6,32 +6,20 @@ on:
   workflow_dispatch:
 
 jobs:
-  trigger-doc-build:
-    name: Trigger doc build
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-      max-parallel: 1
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
-    env:
-      SA_GITHUB_USERNAME: pionix-compiler
-      NIGHTLY_REF: main
-      INPUT_IS_RELEASE: false
-      INPUT_BUILD_PDF: true
-      INPUT_BUILD_HTML: true
-      INPUT_DEPLOY_HTML: true
-      INPUT_SNAPSHOT_FILE: everest/everest/main:snapshots/nightly.yaml
-      INPUT_GITHUB_PAGES_REPO: everest/everest.github.io
-      INPUT_OVERWRITE_EXISTING: true
+  build-docs:
+    name: Build sphinx documentation
+    uses: ./.github/workflows/build-docs.yml
 
-    steps:    
-      - name: Trigger build with workflow_dispatch
-        run: |
-          curl \
-            -X POST \
-            -u "${{ env.SA_GITHUB_USERNAME }}:${{ secrets.SA_GITHUB_PAT }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: application/json" \
-            -d '{"ref":"${{ env.NIGHTLY_REF }}","inputs":{"is_release": "${{ env.INPUT_IS_RELASE }}", "build_pdf": "${{ env.INPUT_BUILD_PDF }}", "build_html": "${{ env.INPUT_BUILD_HTML }}", "deploy_html": "${{ env.INPUT_DEPLOY_HTML }}", "snapshot_file": "${{ env.INPUT_SNAPSHOT_FILE }}", "github_pages_repo": "${{ env.INPUT_GITHUB_PAGES_REPO }}", "overwrite_existing": "${{ env.INPUT_OVERWRITE_EXISTING }}"}' \
-            https://api.github.com/repos/EVerest/EVerest/actions/workflows/deploy-everest-doc.yml/dispatches
+  deploy-everest-doc:
+    name: Deploy EVerest doc
+    needs: [build-docs]
+    uses: ./.github/workflows/deploy-everest-doc.yml
+    with:
+      html_artefact_name: ${{ needs.build-docs.outputs.html_artefact_name }}
+      is_release: false
+      build_pdf: true
+      build_html: true
+      deploy_html: true
+      snapshot_file": everest/everest/main:snapshots/nightly.yaml
+      github_pages_repo": everest/everest.github.io
+      overwrite_existing": true

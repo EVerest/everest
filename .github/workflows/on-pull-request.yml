@@ -1,0 +1,23 @@
+name: Run on every pull request
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-docs:
+    name: Build sphinx documentation
+    uses: ./.github/workflows/build-docs.yml
+    with:
+      build_pdf: false
+      build_html: true
+      snapshot_file: everest/everest-core/main:docs/snapshot.yaml
+      github_pages_repo: everest/everest.github.io
+    secrets: inherit
+
+  check_for_broken_links:
+    name: Check for brocken links
+    needs: [build-docs]
+    uses: ./.github/workflows/check-for-broken-links.yml
+    with:
+      html_artefact_name: ${{ needs.build-docs.outputs.html_artefact_name }}

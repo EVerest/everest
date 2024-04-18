@@ -10,29 +10,24 @@ on:
         type: boolean
       build_pdf:
         description: 'Build PDF documentation?'
-        default: 'false'
         required: true
         type: boolean
       build_html:
         description: 'Build HTML documentation?'
-        default: 'true'
         required: true
         type: boolean
       deploy_html:
         description: 'Deploy HTML documentation?'
-        default: 'true'
         required: true
         type: boolean
       snapshot_file:
         description: 'Snapshot file location: <owner>/<repo>/<ref>:<path-to-snapshot.yaml>'
-        default: 'everest/everest/main:snapshots/example-snapshot.yaml'
-        required: true
         type: string
+        required: true
       github_pages_repo:
         description: 'GithubPages repo: <owner>/<repo>'
-        default: 'everest/everest.github.io'
-        required: true
         type: string
+        required: true
       overwrite_existing:
         description: 'Overwrite existing documentation?'
         default: 'false'
@@ -40,163 +35,17 @@ on:
         type: boolean
 
 jobs:
-  checkout-snapshot-file:
-    name: Checkout snapshot file
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-      max-parallel: 1
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
-    container: 
-      image: ghcr.io/everest/everest-ci-env:main
-    env:
-      SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-    outputs:
-      snapshot_name: ${{ steps.checkout-snapshot-file.outputs.snapshot_name }}
-    steps:
-    - name: Setup ssh key and known_hosts
-      run: |
-        mkdir -p /root/.ssh
-        ssh-keyscan github.com >> /root/.ssh/known_hosts
-        echo "${{ secrets.SA_GITHUB_SSH_KEY }}" > /root/.ssh/github_actions
-        chmod 600 /root/.ssh/github_actions
-        ssh-agent -a ${SSH_AUTH_SOCK} > /dev/null
-        ssh-add /root/.ssh/github_actions
-    # Unfortunately, github doesn't support git-archive requests
-    # svn export would be a workaround here, but it doesn't support
-    # all types of references (e.g. commit hashes)
-    # So we have to clone the full repository temporarily and
-    # extract the snapshot file from there.
-    - name: Checkout snapshot file
-      id: checkout-snapshot-file
-      run: |
-        mkdir -p everest-workspace
-        owner=$(echo ${{ inputs.snapshot_file }} | cut -d':' -f1 | cut -d'/' -f1)
-        repo=$(echo ${{ inputs.snapshot_file }} | cut -d':' -f1 | cut -d'/' -f2)
-        ref=$(echo ${{ inputs.snapshot_file }} | cut -d':' -f1 | cut -d'/' -f3-) # ref can contain slashes
-        path=$(echo ${{ inputs.snapshot_file }} | cut -d':' -f2 )
-        git clone -b ${ref} --depth=1 git@github.com:${owner}/${repo}.git tmp-repo
-        cd tmp-repo && git archive HEAD:$(dirname ${path}) $(basename ${path}) | tar -C ../everest-workspace -xf -
-        cd .. && rm -rf tmp-repo && mv everest-workspace/$(basename ${path}) everest-workspace/snapshot.yaml
-        echo "::set-output name=snapshot_name::$(basename ${path} | cut -d'.' -f1)"
-    - name: Add GithubPages repo to snapshot
-      shell: python3 {0}
-      run: |
-        import yaml
-        from os.path import basename
-        with open('snapshot.yaml', 'r') as f:
-          snapshot = yaml.safe_load(f)
-        snapshot["${{ inputs.github_pages_repo }}".split('/')[-1]] = {
-          'git': 'git@github.com:${{ inputs.github_pages_repo }}.git',
-          'git_tag': 'main',
-        }
-        with open('snapshot.yaml', 'w') as f:
-          yaml.safe_dump(snapshot, f, default_flow_style=False)
-      working-directory: everest-workspace
-    - name: Update snapshot file
-      run: |
-        edm --config snapshot.yaml --workspace .
-        edm snapshot snapshot.yaml --recursive
-      working-directory: everest-workspace
-
-    - name: Upload snapshot file
-      uses: actions/upload-artifact@v3
-      with:
-        name: snapshot-file
-        path: |
-          everest-workspace/snapshot.yaml
-        retention-days: 2
-  build-doc:
-    name: Build EVerest sphinx documentation
-    needs: checkout-snapshot-file
-    strategy:
-      max-parallel: 1
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04]
-    runs-on: ${{ matrix.os }}
-    container: 
-      image: ghcr.io/everest/everest-ci-env:main
-    env:
-      SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-    steps:
-    - name: Setup ssh key and known_hosts
-      run: |
-        mkdir -p /root/.ssh
-        ssh-keyscan github.com >> /root/.ssh/known_hosts
-        echo "${{ secrets.SA_GITHUB_SSH_KEY }}" > /root/.ssh/github_actions
-        chmod 600 /root/.ssh/github_actions
-        ssh-agent -a ${SSH_AUTH_SOCK} > /dev/null
-        ssh-add /root/.ssh/github_actions
-
-    # Setup workspace
-    - name: Download snaphot file
-      uses: actions/download-artifact@v3
-      with:
-        name: snapshot-file
-        path: |
-          everest-workspace
-    - name: Checkout snapshot
-      run: |
-        edm --config snapshot.yaml --workspace .
-      working-directory: everest-workspace
-    - name: List all deployed versions
-      id: list-deployed-versions
-      shell: python3 {0}
-      run: |
-        from typing import List
-        import os
-        from pathlib import Path
-
-        version_list: List[str] = []
-        version_list.extend(
-          item.name for item in (Path("${{ inputs.github_pages_repo }}".split('/')[-1]) / "docs").iterdir() if item.is_dir()
-        )
-        version_list.append("${{ needs.checkout-snapshot-file.outputs.snapshot_name}}")
-        with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-          print(f"versions={ ','.join(str(version) for version in version_list) }", file=f)
-      working-directory: everest-workspace
-
-    - name: Prebuild EVerest rst doc
-      run: |
-        python3 everest/docs/scripts/prebuild-everest-doc.py \
-          --doc-directory everest/docs/ \
-          --core-directory everest-core/ \
-          --snapshot-file snapshot.yaml
-      working-directory: everest-workspace
-
-    - name: Build html sphinx doc
-      if: ${{ inputs.build_html }}
-      env:
-        EVEREST_DEPLOYED_VERSIONS: ${{ steps.list-deployed-versions.outputs.versions }}
-      run: |
-        make -e SPHINXOPTS="-D version='${{ needs.checkout-snapshot-file.outputs.snapshot_name }}'" html
-      working-directory: everest-workspace/everest/docs
-    - name: Upload generated html files
-      if: ${{ inputs.build_html }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: docs-html
-        path: everest-workspace/everest/docs/_build/html/
-
-    - name: Build pdf sphinx doc
-      if: ${{ inputs.build_pdf }}
-      env:
-        EVEREST_DEPLOYED_VERSIONS: ${{ steps.list-deployed-versions.outputs.versions }}
-        buf_size: 1000000
-      run: make -e SPHINXOPTS="-D version='${{ needs.checkout-snapshot-file.outputs.snapshot_name }}'" latexpdf
-      working-directory: everest-workspace/everest/docs
-    - name: Upload generated pdf files
-      if: ${{ inputs.build_pdf }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: docs-pdf
-        path: everest-workspace/everest/docs/_build/latex/
-
+  build-docs:
+    uses: ./.github/workflows/build-docs.yml
+    with:
+      build_pdf: ${{ inputs.build_pdf }}
+      build_html: ${{ inputs.build_html }}
+      snapshot_file: ${{ inputs.snapshot_file }}
+      github_pages_repo: ${{ inputs.github_pages_repo }}
+    secrets: inherit
   deploy-html-doc:
     if: ${{ inputs.build_html && inputs.deploy_html }}
-    needs: [build-doc, checkout-snapshot-file]
+    needs: [build-docs]
     name: Deploy sphinx documentation
     strategy:
       matrix:
@@ -224,7 +73,7 @@ jobs:
     - name: Download generated html files
       uses: actions/download-artifact@v3
       with:
-        name: docs-html
+        name: ${{ needs.build-docs.outputs.html_artefact_name }}
         path: docs-html
     - name: Checkout ${{ env.GITHUB_PAGES_REPO }}
       uses: actions/checkout@v2

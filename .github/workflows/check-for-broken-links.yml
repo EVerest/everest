@@ -1,0 +1,44 @@
+name: Check docs for broken links
+
+env:
+  NODEJS_VERSION: 20
+
+on:
+  workflow_call:
+    inputs:
+      html_artefact_name:
+        description: 'html artifact name'
+        type: string
+        required: true
+
+jobs:
+  check_links:
+    runs-on: ubuntu-22.04
+    name: Check for broken links
+    steps:
+      - name: Setup node
+        uses: ./.github/actions/setup-node
+        with:
+          NODEJS_VERSION: ${{ env.NODEJS_VERSION }}
+
+      - name: Download generated html files
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.html_artefact_name }}
+          path: docs-html
+
+      - name: run blc
+        run: npx -y broken-link-checker docs-html/index.html -ro \
+              --exclude "https://twitter.com/everestincharge" \
+              --exclude "https://www.linkedin.com/company/pionix-gmbh" \
+              --exclude "https://x.com/everestincharge" \
+              --exclude "https://everest.github.io/*/tutorials/Externallinkname" \
+              --exclude "https://everest.github.io/*/tutorials/external_link_ref" \
+              --exclude "https://everest.github.io/*/tutorials/Anchorlinkbytext" \
+              --exclude "https://everest.github.io/*/tutorials/anchorbyref" \
+              --exclude "https://everest.github.io/*/appendix/snapshot.html" \
+              --exclude "https://everest.github.io/*/general/02_quick_start_guide.html#simulating-everest" \
+              --exclude "https://everest.github.io/*/tutorials/how_to_ocpp/02_quick_start_guide.html" \
+              --exclude "https://everest.github.io/*/tutorials/how_to_ocpp/04_module_concept.html" \
+              --exclude "https://github.com/EVerest/everest-core/tree/main/modules/Example" \
+              --exclude "https://json-schema.org/understanding-json-schema/reference"
