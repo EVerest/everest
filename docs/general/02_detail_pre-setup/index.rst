@@ -6,6 +6,14 @@
 Prepare Your Development Environment
 ####################################
 
+.. note::
+
+  This page is about setting up your system environment in the sense of
+  preparing your operating system and some required dependencies.
+
+  For a short example how to setup an IDE to work on EVerest development,
+  see :ref:`the EVerest IDE setup page <preparedevenv_ide_main>`.
+
 A Word on System Environments
 =============================
 
