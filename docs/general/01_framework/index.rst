@@ -2,12 +2,37 @@
 
 EVerest Framework
 #################
+
+****************
+What is EVerest?
+****************
+
 You can think of EVerest as an operating system for EV chargers with
 implementations of communication protocols, software modules for
 representations of hardware devices (chargers, cars, …) and tools
 for simulating the charging process.
 
 It's a full stack environment for EV charging.
+
+The modular software architecture fosters customizability and lets you
+configure your dedicated charging scenarios based on interchangeable modules.
+All this is glued together by MQTT.
+
+
+***********
+Intro video
+***********
+
+If you want to choose viewing a video rather than reading text,
+have a look at our webinar first:
+
+.. image:: /img/webinar-how-everest-ecosystem-simplifies-charging-use-cases-screenshot.png
+  :alt: Screenshot of the webinar video How EVerest Ecosystem simplifies Charging Use Cases
+  :target: https://www.youtube.com/watch?v=OJ6kjHRPkyY
+
+Click for watching on YouTube:
+`Webinar: How the EVerest Ecosystem will simplify Charging Use Cases <https://www.youtube.com/watch?v=OJ6kjHRPkyY>`_
+
 
 *********************
 A Visual Introduction
