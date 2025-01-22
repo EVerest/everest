@@ -81,23 +81,25 @@ systems.
 Tested Environments
 ===================
 
-Ubuntu
+While EVerest is designed to run on Linux-based systems, we only have tested
+it on a few distributions.
+Here is a list of tested environments:
+
+Debian
 ------
+This is the Linux distribution that is recommended for productive setups.
 
-.. warning::
+Tested with Debian 12.
 
-  Ubuntu 20.04 is not supported anymore. Please use Ubuntu 22.04 or newer.
+Here is a list of required packages to get EVerest running on Debian:
 
-Tested with Ubuntu 22.04.
+.. note::
 
-Use `apt` to get your needed libraries installed:
-
-.. code-block:: bash
-
-  sudo apt update
-  sudo apt install -y python3-pip git rsync wget cmake doxygen graphviz build-essential clang-tidy cppcheck openjdk-17-jdk npm docker docker-compose libboost-all-dev nodejs libssl-dev libsqlite3-dev clang-format curl rfkill libpcap-dev libevent-dev pkg-config libcap-dev
-
-Please make sure to have `nodejs` installed with minimum version 10.20 for `node_api` version 6+. For updating to a supported version, please follow the install procedure here: `<https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions>`_.
+  We are currently working on containers to provide a robust setup to test and
+  develop EVerest.
+  Until then, you can have a look at the packages listed for the other Linux
+  distributions below and manually install the required packages on your
+  Debian system.
 
 OpenSUSE
 --------

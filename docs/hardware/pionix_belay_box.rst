@@ -107,7 +107,7 @@ And you will need the following tools:
 
 * ESD safe environment, e.g. ESD wrist band
 * ESD underlay mat
-* Linux host system, Ubuntu >18 recommended
+* Linux host system, Ubuntu 22.04 is recommended
 * 1x Micro USB cable
 * 12 V DC power supply with minimum 30 W to connect to “12 V IN” pins on
   Yak board. A lab power supply is sufficient.
