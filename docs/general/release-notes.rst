@@ -11,12 +11,154 @@ commits on GitHub:
 `EVerest releases <https://github.com/EVerest/everest-core/releases>`_
 
 EVerest releases are scheduled monthly. A release for a dedicated month can be
-expected in the beginning of the following month. Each third release (March,
-June, September and December) will be a stable release including a two week
-feature freeze phase before the release date.
+expected in the beginning of the following month. Each third release will be a
+stable release including a two week feature freeze phase before the release
+date.
+
+.. hint::
+
+    Currently, the stable releases will be the ones in January, April, July
+    and October.
+    Although we want to keep the stable release cadence this way, this could
+    also change in the future.
 
 Here are the some high-level changes for the last releases (starting from the
 most recent one backwards):
+
+2025.1.0
+========
+
+General changes
+---------------
+
+* Accept bank cards only for specific connectors.
+* New documentation and tests, e.g. for EnergyManager and EvseV2G.
+
+Hardware
+--------
+
+* Added NXP PN7160 NFC chip support as token provider module.
+
+2024.12.0
+=========
+
+Decision to have the quarterly stable version cadence moved one month further.
+Reason for this is the December holidays. So, see January 2025 release.
+
+2024.11.0
+=========
+
+General changes
+---------------
+
+* Adding ISO 15118-20 Dynamic Mode support. See
+  `PR 912 <https://github.com/EVerest/everest-core/pull/912>`_.
+* Added composed device model storage and EVerest device model storage, see
+  `PR 846 <https://github.com/EVerest/everest-core/pull/846>`_.
+
+OCPP
+----
+
+* Reservation changes for OCPP 2.0.1, see
+  `PR 943 <https://github.com/EVerest/everest-core/pull/943>`_.
+* Support for multiple temperature readings in OCPP 1.6, see
+  `PR 986 <https://github.com/EVerest/everest-core/pull/986>`_.
+
+Further fixes and enhancements, see
+`Release 2024.11.0 notes on GitHub <https://github.com/EVerest/everest-core/releases/tag/2024.11.0>`_.
+
+2024.10.0
+=========
+
+General changes
+---------------
+
+* Beta release of ISO 15118-20, see
+  `PR 638 <https://github.com/EVerest/everest-core/pull/638>`_.
+* Multiplexer for ISO communication to decide which protocol version to use
+  for communication. See
+  `PR 776 <https://github.com/EVerest/everest-core/pull/776>`_.
+* Supporting multiple server certificate chains. See
+  `PR 919 <https://github.com/EVerest/everest-core/pull/919>`_ and
+  `PR 923 <https://github.com/EVerest/everest-core/pull/923>`_.
+
+Hardware
+--------
+
+* Micro Mega Watt Charger: Ramp up voltage slowly to reduce overshoot, see
+  `PR 886 <https://github.com/EVerest/everest-core/pull/886>`_.
+
+Also many further fixes and enhancements - see
+`release 2024.10.0 notes on GitHub <https://github.com/EVerest/everest-core/releases/tag/2024.10.0>`_.
+
+2024.9.1 - LATEST STABLE
+========================
+
+Using libocpp version 0.18.1 (instead of 0.18.0). See
+`release libocpp 0.18.1 <https://github.com/EVerest/libocpp/releases/tag/v0.18.1>`_.
+
+2024.9.0
+========
+
+General changes
+---------------
+
+* Introducing a C++ replacement for the SLAC Simulator (former JS), see
+  `PR 859 <https://github.com/EVerest/everest-core/pull/859>`_.
+* Extending 1ph/3ph switching, see
+  `PR 807 <https://github.com/EVerest/everest-core/pull/807>`_.
+* Lock connector in CP state B defined by config, see
+  `PR 865 <https://github.com/EVerest/everest-core/pull/865>`_.
+* Interface for providing acces to generic errors, see
+  `PR 842 <https://github.com/EVerest/everest-core/pull/842>`_.
+* Bump cmake version to 3.16.
+* Bugfix of legacy wakeup for PWM charging, see
+  `PR 845 <https://github.com/EVerest/everest-core/pull/845>`_.
+* Bugfix regarding TLS server certificate hash calculation, see
+  `PR 902 <https://github.com/EVerest/everest-core/pull/902>`_.
+* Further bug fixes and minor enhancements, see
+  `release 2024.9.0 notes on GitHub <https://github.com/EVerest/everest-core/releases/tag/2024.9.0>`_.
+
+OCPP
+----
+
+* Configurable unit regarding composite schedules, see
+  `PR 914 <https://github.com/EVerest/everest-core/pull/914>`_.
+* OCPP 2.0.1 Smart Charging integration, see
+  `PR 854 <https://github.com/EVerest/everest-core/pull/854>`_.
+* OCPP 2.0.1: Bugfix regarding energy_Wh_import_signed meter value, see
+  `PR 840 <https://github.com/EVerest/everest-core/pull/840>`_.
+
+Hardware
+--------
+
+* phyVERSO: Implemented request_stop_transaction via external push button, see
+  `PR 791 <https://github.com/EVerest/everest-core/pull/791>`_.
+* Added config option for refresh rate regarding power meters, see
+  `PR 864 <https://github.com/EVerest/everest-core/pull/864>`_.
+
+2024.8.0
+========
+
+OCPP
+----
+
+* Optimized clarification of generated code segments in header files.
+  See `PR 741 <https://github.com/EVerest/libocpp/pull/741>`_ and
+  `PR 825 <https://github.com/EVerest/everest-core/pull/825>`_.
+* Changes due to integration of California pricing requirements, see
+  `PR 768 <https://github.com/EVerest/everest-core/pull/768>`_.
+* Support of connector_id's other than 1, see
+  `PR 836 <https://github.com/EVerest/everest-core/pull/836>`_.
+
+Other topics
+------------
+
+* Bugfix regrading legacy wakeup in EvseManager, see
+  `PR 823 <https://github.com/EVerest/everest-core/pull/823>`_.
+* Added error handling documentation to EvseManager and OCPP modules.
+* Further bugfixes and minor enhancements, see
+  `release 2024.8.0 notes on GitHub <https://github.com/EVerest/everest-core/releases/tag/2024.8.0>`_.
 
 2024.7.1
 ========
@@ -82,8 +224,8 @@ Further changes
   cmake process now.
 * The output of compile warnings has been enabled by default.
 
-2024.6.0 - LATEST STABLE
-========================
+2024.6.0
+========
 
 Security Fix: Prevent integer overflow in EvseV2G
 -------------------------------------------------
